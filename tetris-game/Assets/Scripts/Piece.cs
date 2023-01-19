@@ -38,6 +38,8 @@ public class Piece : MonoBehaviour
     {
         this.board.Clear(this);
 
+        this.lockTime += Time.deltaTime;
+
         if(Input.GetKeyDown(KeyCode.Q))
         {
             Rotate(-1);
@@ -60,7 +62,32 @@ public class Piece : MonoBehaviour
         {
             HardDrop();
         }
+
+        if (Time.time >= this.stepTime)
+        {
+            Step();
+        }
         this.board.Set(this);
+    }
+
+    private void Step()
+    {
+        this.stepTime = Time.time + this.stepDelay;
+
+        Move(Vector2Int.down);
+
+        if (this.lockTime >= this.lockDelay)
+        {
+            Lock();
+        }
+    }
+
+    private void Lock()
+    {
+        this.board.Set(this);
+        this.board.ClearLines();
+        this.board.SpawnPiece();
+
     }
 
     private void HardDrop()
@@ -69,6 +96,8 @@ public class Piece : MonoBehaviour
         {
             continue;
         }
+
+        Lock();
     }
 
     private bool Move(Vector2Int translation)
@@ -82,6 +111,7 @@ public class Piece : MonoBehaviour
         if(valid)
         {
             this.position = newPosition;
+            this.lockTime = 0f;
         }
         return valid;
 
